@@ -1,0 +1,80 @@
+## [3.0.10] - not release yet
+ * @todo Annotate an ellipse with five clicks on the border (https://gitlab.com/vgg/via/-/issues/279)
+
+## [3.0.9] - 9 Oct. 2020
+ * added zoom (i.e. magnifying glass) feature to inspect fine image details in image annotator
+ * create subtitle annotator to manage subtitle for audio and video files
+
+## [3.0.8] - 01 July 2020
+ * audio amplitude shown in temporal segmentation timeline (experimental feature, hence disabled by default)
+ * HTML application (https://gitlab.com/vgg/via/-/blob/via-3.x.y/via-3.x.y/scripts/io/via3_video_annotation_to_coco.html) to export frame level video annotations in COCO format
+ * if attribute values shown as rows of temporal segmenter contains numbers, they will be sorted numerically
+ * add/delete of timeline entries
+ * timeline list can now be reordered using Ctrl + up/down arrow
+ * fixed issue with nested spatial region selection
+
+## [3.0.7] - 07 May 2020
+ * value (instead of key) shown for SELECT type attributes in video timeline
+ * users can select the number of timeline that can be seen at any time
+ * timeline entries are taken from both attribute options and new values contained in metadata
+ * selected temporal segment can be moved using up/down arrow key to the previous/next timeline
+ * added n/p shorcut keys for image annotator to move to next/previous image
+ * improve code documentation by adding a description of the structure of VIA3 project json file (see via-3.x.y/CodeDoc.md)
+ * added demo for annotation of image pairs (see via/via-3.x.y/dist/demo/via_pair_annotator.html)
+
+## [3.0.6] - 20 August 2019
+ * file and spatial metadata editors are now collapsable
+ * spatial regions are automatically associated with the selected temporal segment
+ * added n/p keyboard shortcut keys to move to next/previous frame
+ * spatial metadata z-index increased to avoid hiding behind temporal segment editor
+
+## [3.0.5] - 14 August 2019
+ * pack script creates target folders if they are missing (merge request 21)
+ * VIA now allows the extreme clicking annotation method for defining rectangular (merge request 22) and circular regions
+ * circle selection issue fixed
+ * bulk add file uri issue fixed (issue 206)
+ * VIA projects created in version 2.x.y can now be imported in VIA version 3 (issue 203)
+ * Added file metadata editor (for example: we use file metadata editor to add a caption to each image, audio or video)
+ * Merge operation on VIA shared projects now uses 3-way merge algorithm
+ * event handler subscription now requires name of the subscriber (useful for deleting selecting subscribers)
+ * removed unused code for audiospectrum, export temporal segments to plain csv, project name update fixed
+
+## [3.0.4] - 02 July 2019
+ * issue with spatial region attribute definition fixed
+ * spatial region drawn on image is not shown after region draw operation completes
+ * rectangular region selection shows unwanted marker
+ * reduced the z-index of screen annotation editor to avoid collison with VIA page
+ * spatial region label visible and is user selectable (using mouse wheel)
+ * polygon and polyline drawing issues fixed (Esc to undo vertex addition, Enter to finish)
+ * improved bulk file uri addition (list of file URI can be pasted in textarea or imported from a text file)
+ * fixed a major issue with code that generated unique file-id and view-id
+
+## [3.0.3] - 26 June 2019
+ * csv export: spatial metadata export contains option-id, added notes, removed extra curley brances from csv JSON export "{...}"
+ * temporal (z) and spatial coordinates (xy) are represented as numbers with 3 decimal places
+ * update spatial region markers (black dots in timeline) when user adds new regions (issue: 195)
+ * metadata now gets deleted and are not left flagged as deleted.
+ * code cleanup
+ * when a file cannot be loaded, an error page is shown which allows update of file properties (issue: 196)
+ * VIA now supports collaborative annotation using the VIA share feature
+
+## [3.0.2] - 21 May 2019
+ * shape selector icon now gets highlighted
+ * fixed issues caused by rename of temporal segment variable's value
+ * fixed issue in thumbnail caused by files added using file:// uri (path issue)
+ * minor UI updates
+
+## [3.0.1] - 20 May 2019
+ * keyboard event listener attached to window instead of via_container to avoid missing keydown events when something else is in focus
+
+## [3.0.0] - 17 May 2019
+ * development of via-3.x.y began in Dec. 2018 with the aim to create a basic audio and video annotator
+ * no external dependency, self contained and easy to use
+ * light weight (complete application fits in a single html file of size ~ 275 KB)
+ * manual annotation of local (using file:// uri) and remote (using http:// uri) files
+ * supports definition of both temporal segmentation (e.g. from 3.2sec to 8.7sec) and spatial region (e.g. bounding box in still video frame)
+ * keyboard shorcuts allow human annotators to be quick with manual annotation
+ * annotations can be exported in CSV format
+ * to reduce cognitive load on human annotators, VIA3 support for attributes of different types (plain text, drop down, radio, checkbox)
+ * self contained demo for audio and video annotation
+
