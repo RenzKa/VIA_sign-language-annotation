@@ -1,4 +1,42 @@
-# VGG Image Annotator Version 3 (VIA3)
+# VIA Sign Language Annotator (VIA-SLA)
+This repository contains the code for a modification of the VIA subtitle annotator to annotate sign language videos.
+With [this repo](https://github.com/RenzKa/sign-segmentation) it is possible to extract proposals for sign segments and sign names.
+
+![alt text](doc/overview.png)
+
+## Usage
+* Open `dist/via_subtitle_annotator.html`.
+* Import video (2.) 
+* [Optional] Load `.txt` file with sign class names. These class names appear in the dropdown menu. (3.)
+* [Optional] Load pre-extracted `.vtt` file generated from [this repo](https://github.com/RenzKa/sign-segmentation). The top-10 class predictions appear at the top of the dropdown menu. (4.)
+* Generate/ Adjust segments on the bottom.
+* Write/ select sign class.
+* Export annotation files (seperate for right and left hand)
+![alt text](doc/buttons.png)
+
+
+## Citation
+If you use this tool and the proposals, please cite the original VIA tool and the following:
+```
+@inproceedings{Renz2021signsegmentation_a,
+    author       = "Katrin Renz and Nicolaj C. Stache and Samuel Albanie and G{\"u}l Varol",
+    title        = "Sign Language Segmentation with Temporal Convolutional Networks",
+    booktitle    = "ICASSP",
+    year         = "2021",
+}
+```
+```
+@inproceedings{Renz2021signsegmentation_b,
+    author       = "Katrin Renz and Nicolaj C. Stache and Neil Fox and G{\"u}l Varol and Samuel Albanie",
+    title        = "Sign Segmentation with Changepoint-Modulated Pseudo-Labelling",
+    booktitle    = "CVPRW",
+    year         = "2021",
+}
+```
+
+
+
+# Information original tool: VGG Image Annotator Version 3 (VIA3)
 
 VGG Image Annotator version 3 (i.e. VIA3) is a simple and standalone manual 
 annotation software for image, audio and video. VIA3 runs in a web browser and
@@ -11,21 +49,6 @@ HTML, Javascript and CSS (no dependency on external libraries). VIA3 is
 developed at the [Visual Geometry Group](http://www.robots.ox.ac.uk/~vgg/) (VGG) 
 and released under the BSD-2 clause [license](https://gitlab.com/vgg/via/blob/master/LICENSE)
 which allows it to be useful for both academic projects and commercial applications.
-
-## Screenshots
-<img src="via-3.x.y/doc/screenshots/via_video_annotator.png" alt="Temporal segments showing different human activities (e.g. break egg, pour liquid, etc.) and spatial regions (e.g. bounding box of cup) occupied by different objects in a still video frame are manually delineated in a video showing preparation of a drink." title="Temporal segments showing different human activities (e.g. break egg, pour liquid, etc.) and spatial regions (e.g. bounding box of cup) occupied by different objects in a still video frame are manually delineated in a video showing preparation of a drink." height="500">
-<img src="via-3.x.y/doc/screenshots/via_audio_annotator.png" alt="Speech segments of two individuals is manually delineated in an audio recording of conversation between ATC and pilot" title="Speech segments of two individuals is manually delineated in an audio recording of conversation between ATC and pilot" height="370">
-
-## Download
-Detailed instructions for download of VIA3 are available at http://www.robots.ox.ac.uk/~vgg/software/via/
-
-## Demo
-We have created self contained demo to illustrate the usage of VIA3. These demo
-have been preloaded with some sample audio and video files. Furthermore, we have 
-also added some sample manual annotations to these demo. These demo applications 
-are very useful to get familiar with the commonly used features of VIA3.
-  * [Video Annotator Demo](http://www.robots.ox.ac.uk/~vgg/software/via/demo/via_video_annotator.html)
-  * [Audio Annotator Demo](http://www.robots.ox.ac.uk/~vgg/software/via/demo/via_audio_annotator.html)
 
 ## Open Source Ecosystem
 The development of VIA software began in August 2016 and the first public
