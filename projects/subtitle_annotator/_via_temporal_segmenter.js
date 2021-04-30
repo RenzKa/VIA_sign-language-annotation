@@ -42,7 +42,7 @@ function _via_temporal_segmenter(file_annotator, container, vid, groupby_aid, da
   this.GID_COL_WIDTH = 15;             // units of char width
   this.METADATA_CONTAINER_HEIGHT = 22; // units of char width
   this.METADATA_EDGE_TOL = 0.1;
-  this.TEMPORAL_SEG_EDGE_SNAP_TOL = 0.15; // in sec.
+  this.TEMPORAL_SEG_EDGE_SNAP_TOL = 0.01 //0.15; // in sec.
   this.GTIMELINE_REGION_MARKER_MOUSE_TOL = 0.1; // in sec.
 
   this.PLAYBACK_MODE = { NORMAL:'1', REVIEW_SEGMENT:'2', REVIEW_GAP:'3' };
@@ -420,25 +420,30 @@ _via_temporal_segmenter.prototype._tmetadata_gtimeline_init = function() {
 }
 
 _via_temporal_segmenter.prototype._tmetadata_gtimeline_wheel_listener = function(e) {
-  var offset = this.TEMPORAL_SEG_MOVE_OFFSET;
-  if(e.shiftKey) {
-    offset = offset * 60;
-  }
-  // pan temporal segment horizontally
-  if (e.deltaY < 0) {
-    if( (this.m.currentTime + offset) > this.m.duration) {
-      offset = this.m.duration - this.m.currentTime;
+  if ( e.shiftKey ) {
+    // zoom temporal segment
+    if (e.deltaY < 0) {
+      this._tmetadata_gtimeline_zoomin();
+    } else {
+      this._tmetadata_gtimeline_zoomout();
     }
-    this._tmetadata_boundary_move(offset);
   } else {
-    if( (this.m.currentTime - offset) < 0.0) {
-      offset = this.m.currentTime;
+    var offset = this.TEMPORAL_SEG_MOVE_OFFSET;
+    // pan temporal segment horizontally
+    if (e.deltaY < 0) {
+      if( (this.m.currentTime + offset) > this.m.duration) {
+        offset = this.m.duration - this.m.currentTime;
+      }
+      this._tmetadata_boundary_move(offset);
+    } else {
+      if( (this.m.currentTime - offset) < 0.0) {
+        offset = this.m.currentTime;
+      }
+      this._tmetadata_boundary_move(-offset);
     }
-    this._tmetadata_boundary_move(-offset);
   }
   this._tmetadata_gtimeline_draw();
   this._tmetadata_group_gid_draw_all();
-
   e.preventDefault();
 }
 
@@ -1542,6 +1547,7 @@ _via_temporal_segmenter.prototype._tmetadata_group_gid_mouseup = function(e) {
     } else {
       offset = 1;
     }
+    this.timeline_move_is_ongoing = false;
     this._tmetadata_boundary_move(offset);
     this._tmetadata_gtimeline_draw();
     this._tmetadata_group_gid_draw_all();

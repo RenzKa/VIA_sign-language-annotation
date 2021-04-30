@@ -16,6 +16,9 @@ function _via(via_container) {
   this.via_container = via_container;
 
   this.d  = new _via_data();
+  this.d_RH  = new _via_data();
+  this.d_LH  = new _via_data();
+
   this.SUBTITLE_AID = '1';
   // add new attribute for subtitle
   this.d['store']['attribute'][this.SUBTITLE_AID] = {'aname':'subtitle', 'anchor_id':'FILE1_Z2_XY0', 'type':1, 'desc':'Subtitle text', 'options':{}, 'default_option_id':'' };
@@ -51,13 +54,13 @@ function _via(via_container) {
   this.via_container.appendChild(this.message_container);
 
   //// initialise content creators and managers
-  this.ie = new _via_import_export(this.d);
+  this.ie = new _via_import_export(this.d, this.d_RH, this.d_LH);
 
-  this.va = new _via_view_annotator(this.d, this.view_container);
+  this.va = new _via_view_annotator(this.d, this.view_container, this.d_RH, this.d_LH);
   this.editor = new _via_editor(this.d, this.va, this.editor_container);
 
   this.view_manager_container = document.createElement('div');
-  this.vm = new _via_view_manager(this.d, this.va, this.view_manager_container);
+  this.vm = new _via_view_manager(this.d, this.va, this.view_manager_container, this.d_RH, this.d_LH);
   this.vm._init();
 
   // control panel shows the view_manager_container

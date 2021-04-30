@@ -21,9 +21,11 @@ const _VIA_PAGE = {
   'START_INFO':'page_start_info',
 };
 
-function _via_view_annotator(data, container ) {
+function _via_view_annotator(data, container, data_RH=null, data_LH=null) {
   this._ID = '_via_view_annotator_';
   this.d = data;
+  this.d_RH = data_RH;
+  this.d_LH = data_LH;
   this.c = container;
   this.file_annotator = [];
   this.view_mode = _VIA_VIEW_MODE.UNKNOWN;
@@ -42,6 +44,12 @@ function _via_view_annotator(data, container ) {
 
   this.d.on_event('metadata_add', this._ID, this._on_event_metadata_add.bind(this));
   this.d.on_event('metadata_update', this._ID, this._on_event_metadata_update.bind(this));
+  if (this.d_LH != null) {
+    this.d_LH.on_event('metadata_add', this._ID, this._on_event_metadata_add.bind(this));
+    this.d_LH.on_event('metadata_update', this._ID, this._on_event_metadata_update.bind(this));
+    this.d_RH.on_event('metadata_add', this._ID, this._on_event_metadata_add.bind(this));
+    this.d_RH.on_event('metadata_update', this._ID, this._on_event_metadata_update.bind(this));
+  }
 
   this._init();
 }
@@ -164,7 +172,7 @@ _via_view_annotator.prototype._view_annotate_single_audio_or_video_subtitle = fu
     this.subtitle_editor_container = this.file_container[0][0];
     this.subtitle_editor_container.setAttribute('id', 'subtitle_editor');
     this.subtitle_editor_container.setAttribute('class', '');
-    this.subtitle_editor = new _via_subtitle_editor(this.groupby_aid, this.d, this.temporal_segmenter, this.subtitle_editor_container);
+    this.subtitle_editor = new _via_subtitle_editor(this.groupby_aid, this.d, this.temporal_segmenter, this.subtitle_editor_container, this.d_RH, this.d_LH);
   }.bind(this), function(err) {
     this.c.removeChild(this.view_metadata_container);
     this.c.setAttribute('style', 'grid-template-rows:1fr;')

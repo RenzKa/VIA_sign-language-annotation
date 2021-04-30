@@ -14,6 +14,7 @@ function _via_data() {
   this.store = this._init_default_project();
   this.file_ref = {};        // ref. to files selected using browser's file selector
   this.file_object_uri = {}; // WARNING: cleanup using file_object_url[fid]._destroy_file_object_url()
+  this.log = [];
 
   this.DATA_FORMAT_VERSION = '3.1.1';
 
@@ -332,13 +333,17 @@ _via_data.prototype.metadata_add = function(vid, z, xy, av) {
   }.bind(this));
 }
 
-_via_data.prototype.metadata_add_bulk = function(metadata_list, emit) {
+_via_data.prototype.metadata_add_bulk = function(metadata_list, emit, existing_mids=null) {
   return new Promise( function(ok_callback, err_callback) {
     try {
       var added_mid_list = [];
       for ( var mindex in metadata_list ) {
         var vid = metadata_list[mindex].vid;
-        var mid = this._metadata_get_new_id(vid);
+        if (existing_mids==null){
+          var mid = this._metadata_get_new_id(vid);
+        } else {
+          var mid = existing_mids[mindex]
+        }
         var z_fp = _via_util_float_arr_to_fixed(metadata_list[mindex].z, _VIA_FLOAT_FIXED_POINT);
         var xy_fp = _via_util_float_arr_to_fixed(metadata_list[mindex].xy, _VIA_FLOAT_FIXED_POINT);
         this.store.metadata[mid] = new _via_metadata(vid, z_fp, xy_fp, metadata_list[mindex].av);
@@ -347,6 +352,9 @@ _via_data.prototype.metadata_add_bulk = function(metadata_list, emit) {
         }
         this.cache.mid_list[vid].push(mid);
         added_mid_list.push(mid);
+        if ('top5' in metadata_list[mindex]){
+          this.store.metadata[mid].top5 = metadata_list[mindex]['top5']
+        }
       }
       if ( typeof(emit) !== 'undefined' &&
            emit === true ) {

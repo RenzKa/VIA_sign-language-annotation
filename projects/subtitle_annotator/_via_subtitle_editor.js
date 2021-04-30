@@ -4,10 +4,12 @@
  * @author Abhishek Dutta <adutta@robots.ox.ac.uk>
  * @since 21 Sep. 2020
  */
-function _via_subtitle_editor(groupby_aid, data, temporal_segmenter, container) {
+function _via_subtitle_editor(groupby_aid, data, temporal_segmenter, container, data_RH=null, data_LH=null) {
   this._ID = '_via_subtitle_editor';
   this.groupby_aid = groupby_aid;
   this.d  = data;
+  this.d_RH  = data_RH;
+  this.d_LH  = data_LH;
   this.ts = temporal_segmenter;
   this.c  = container;
 
@@ -27,6 +29,9 @@ function _via_subtitle_editor(groupby_aid, data, temporal_segmenter, container) 
 }
 
 _via_subtitle_editor.prototype.init = function() {
+  for (ix in [...Array(this.ts.m.textTracks.length).keys()]){
+    this.ts.m.textTracks[ix].mode = 'disabled'
+  }
   var subtitle_track = this.ts.m.addTextTrack('subtitles', 'English', 'en');
   subtitle_track.mode = 'showing';
 
@@ -41,8 +46,12 @@ _via_subtitle_editor.prototype.init = function() {
   this.mid_list = Object.keys(this.d.store.metadata);
   this.mid_list.sort( this._compare_mid_by_time.bind(this) );
   var row_index = 1;
+
+
   for(var mindex in this.mid_list) {
+    // debugger
     var mid = this.mid_list[mindex];
+    this.tmp_mid = mid;
     var index = document.createElement('td');
     index.innerHTML = row_index;
     var row = document.createElement('tr');
@@ -56,22 +65,128 @@ _via_subtitle_editor.prototype.init = function() {
     var end = _via_seconds_to_hh_mm_ss_ms(this.d.store.metadata[mid]['z'][1]);
     etime.innerHTML = '<span class="hhmmss">' + end[0] + ':' + end[1] + ':' + end[2] + '</span><span class="ms">' + end[3] + '</span>';
 
+
     var subtitle = document.createElement('td');
+    subtitle.setAttribute('id', 'subtitle');
+
+    // show selected 
+    var selected_gloss = document.createElement('td')
+    selected_gloss.setAttribute('id', 'selected_gloss_' + mid);
+    selected_gloss.setAttribute('width', '200px')
+    selected_gloss.innerText = this.d.store.metadata[mid]['av'][this.groupby_aid];
+    // selected_gloss.setAttribute('text', 'test')
+    // selected_gloss.setAttribute('value', 'test')
+
+    // editable dropdown
     var input = document.createElement('input');
+    input.setAttribute('id', 'input_' + mid);
+    input.setAttribute('list', 'browsers'+mindex);
+    input.setAttribute('name', 'browser');
     input.setAttribute('type', 'text');
-    //input.setAttribute('disabled', '');
     input.setAttribute('data-mid', mid);
-    input.setAttribute('value', this.d.store.metadata[mid]['av'][this.groupby_aid]);
+
     input.addEventListener('click', this.onclick_subtitle_text.bind(this));
     input.addEventListener('change', this.onchange_subtitle_text.bind(this));
+    var datalist = document.createElement('datalist');
+    datalist.setAttribute('id', 'browsers'+mindex);
+
+    // Top-5 Dropdown here
+    // 
+    // var select = document.createElement('select');
+    // select.setAttribute('data-mid', mid);
+    // select.addEventListener('click', this.onclick_subtitle_text.bind(this));
+    // select.addEventListener('change', this.onchange_subtitle_text.bind(this));
+
+    // var list_test = this.d.store.metadata[mid]['av'][this.groupby_aid];
+    // var values_test = list_test.split(',');
+    // for(var ix in values_test) { 
+    //   var opt1 = document.createElement('option')
+    //   opt1.setAttribute('value', values_test[ix]);  
+    //   opt1.text = values_test[ix]
+    //   select.appendChild(opt1);
+    //   // datalist.appendChild(opt1);
+    // }
+    
+
+    // Top-5
+    if ('top5' in this.d.store.metadata[mid]){
+      var top5_list = this.d.store.metadata[mid]['top5']["0"];
+      var values_test = top5_list.split(',');
+      for(var ix in values_test) { 
+        var opt2 = document.createElement('option')
+        opt2.setAttribute('value', values_test[ix]);  
+        opt2.text = values_test[ix]
+        datalist.appendChild(opt2);
+      }
+    }
+
+    // All classes
+    var class_list = this.d.classes
+    for(var ix in class_list) {
+      var opt2 = document.createElement('option')
+      opt2.setAttribute('value', class_list[ix]);  
+      opt2.text = class_list[ix]
+      datalist.appendChild(opt2);
+    }
+    // subtitle.appendChild(select);
+    input.appendChild(datalist)
     subtitle.appendChild(input);
-    //subtitle.innerHTML = '<input data-mid="' + mid + '" type="text" disabled value="' + this.d.store.metadata[mid]['av'][this.groupby_aid] + '">';
-    //subtitle.innerHTML = this.d.store.metadata[mid]['av'][this.groupby_aid];
+
+
+    var RH_label = document.createElement('label');
+    var checkbox_RH = document.createElement('input')
+    checkbox_RH.setAttribute('type', 'checkbox');
+    checkbox_RH.setAttribute('id', 'RH');
+    checkbox_RH.setAttribute('value', 'RH');
+    checkbox_RH.setAttribute('data-mid', mid);
+
+    if (mid in this.d_RH.store.metadata){
+      if ('checkbox' in this.d_RH.store.metadata[mid]){
+        if (this.d_RH.store.metadata[mid].checkbox == true){
+          checkbox_RH.setAttribute('checked', true);
+        }
+      }
+    }
+    checkbox_RH.addEventListener('click', this.onclick_subtitle_text.bind(this));
+    checkbox_RH.addEventListener('change', this.onchange_checkbox_RH.bind(this));
+    RH_label.innerHTML = 'RH';
+    RH_label.appendChild(checkbox_RH)
+
+
+    var LH_label = document.createElement('label');
+    var checkbox_LH = document.createElement('input')
+    checkbox_LH.setAttribute('type', 'checkbox');
+    checkbox_LH.setAttribute('id', 'LH');
+    checkbox_LH.setAttribute('value', 'LH');
+    checkbox_LH.setAttribute('data-mid', mid);
+    if ('checkbox_init' in this.d.store.metadata[mid]){
+      if (mid in this.d_LH.store.metadata){
+        if ('checkbox' in this.d_LH.store.metadata[mid]){
+          if (this.d_LH.store.metadata[mid].checkbox == true){
+            checkbox_LH.setAttribute('checked', true);
+          }
+        }
+      }
+    } else {
+      this.init_checkbox_LH(mid)
+      this.init_checkbox_RH(mid)
+      checkbox_RH.setAttribute('checked', true);
+      checkbox_LH.setAttribute('checked', true);
+      this.d.store.metadata[mid]['checkbox_init'] = true;
+    }
+
+    checkbox_LH.addEventListener('click', this.onclick_subtitle_text.bind(this));
+    checkbox_LH.addEventListener('change', this.onchange_checkbox_LH.bind(this));
+    LH_label.innerHTML = 'LH';
+    LH_label.appendChild(checkbox_LH)
 
     row.appendChild(index);
     row.appendChild(stime);
     row.appendChild(etime);
+    row.appendChild(selected_gloss);
     row.appendChild(subtitle);
+    row.appendChild(RH_label);
+    row.appendChild(LH_label);
     this.subtitle_tbody.appendChild(row);
     row_index = row_index + 1;
 
@@ -88,11 +203,12 @@ _via_subtitle_editor.prototype.init = function() {
 }
 
 _via_subtitle_editor.prototype.onclick_subtitle_text = function(e) {
+  // event.stopPropagation();
   if(e.target.parentNode.parentNode.classList.contains('sel_row')) {
     // remove selection
-    this.remove_subtitle_sel();
-    e.target.blur();
-    this.inform_temporal_segmenter_of_unselect();
+    // this.remove_subtitle_sel();
+    // e.target.blur();
+    // this.inform_temporal_segmenter_of_unselect();
   } else {
     var mid = e.target.dataset.mid;
     var mindex = this.mid_list.indexOf(mid);
@@ -105,6 +221,11 @@ _via_subtitle_editor.prototype.onclick_subtitle_text = function(e) {
 _via_subtitle_editor.prototype.onchange_subtitle_text = function(e) {
   var mid = e.target.dataset.mid;
   var new_subtitle_text = e.target.value.trim();
+  // show selcted in seperate text field
+  var selected_gloss_element = document.getElementById('selected_gloss_' + mid);
+  selected_gloss_element.innerText = new_subtitle_text
+  var input_element = document.getElementById('input_' + mid);
+  input_element.value = "";
   this.d.metadata_update_av(this.ts.vid, mid, this.groupby_aid, new_subtitle_text).then( function(ok) {
     // update subtitle track cue
     var mindex = this.mid_list.indexOf(mid);
@@ -118,6 +239,44 @@ _via_subtitle_editor.prototype.onchange_subtitle_text = function(e) {
   }.bind(this));
 }
 
+_via_subtitle_editor.prototype.init_checkbox_RH = function(mid) {
+  var _this = this
+  _this.d_RH.metadata_add_bulk([_this.d.store.metadata[mid]], true, [mid])
+  _this.d_RH.store.metadata[mid].checkbox = true
+}
+
+_via_subtitle_editor.prototype.onchange_checkbox_RH = function(e) {
+  // debugger;
+  var mid = e.target.dataset.mid;
+  if (e.target.checked) {
+    console.log("Checkbox is checked..");
+    this.d_RH.metadata_add_bulk([this.d.store.metadata[mid]], true, [mid])
+    this.d_RH.store.metadata[mid].checkbox = true
+  } else {
+    console.log("Checkbox is not checked..");
+    this.d_RH.metadata_delete(this.ts.vid, mid)
+  }
+}
+
+_via_subtitle_editor.prototype.init_checkbox_LH = function(mid) {
+
+  this.d_LH.metadata_add_bulk([this.d.store.metadata[mid]], true, [mid])
+  this.d_LH.store.metadata[mid].checkbox = true
+
+}
+_via_subtitle_editor.prototype.onchange_checkbox_LH = function(e) {
+  debugger;
+  var mid = e.target.dataset.mid;
+  if (e.target.checked) {
+    console.log("Checkbox is checked..");
+    this.d_LH.metadata_add_bulk([this.d.store.metadata[mid]], true, [mid])
+    this.d_LH.store.metadata[mid].checkbox = true
+  } else {
+    console.log("Checkbox is not checked..");
+    this.d_LH.metadata_delete(this.ts.vid, mid)
+  }
+}
+
 _via_subtitle_editor.prototype.remove_subtitle_sel = function() {
   if(this.selected_mindex !== -1) {
     // remove existing selection
@@ -128,6 +287,8 @@ _via_subtitle_editor.prototype.remove_subtitle_sel = function() {
 }
 
 _via_subtitle_editor.prototype.subtitle_sel = function(mindex) {
+  new Date()
+  this.d.log.push(Date.now()+ ':  clicked:' + mindex )
   this.selected_mindex = mindex;
   var new_row = document.getElementById('subtitle_mindex_' + this.selected_mindex);
   new_row.classList.add('sel_row');

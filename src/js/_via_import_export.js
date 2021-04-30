@@ -9,8 +9,10 @@
 
 'use strict';
 
-function _via_import_export(data) {
+function _via_import_export(data, data_RH=null, data_LH=null) {
   this.d = data;
+  this.d_RH = data_RH
+  this.d_LH = data_LH
 
   // registers on_event(), emit_event(), ... methods from
   // _via_event to let this module listen and emit events
@@ -25,10 +27,26 @@ _via_import_export.prototype.import_from_file = function(data_format, file) {
     break;
   case 'webvtt':
     _via_util_load_text_file(file[0], this.import_subtitle_from_webvtt.bind(this));
+  case 'txt':
+    _via_util_load_text_file(file[0], this.import_from_txt.bind(this));
   default:
     console.warn('Unknown data format: ' + data_format);
   }
 }
+
+_via_import_export.prototype.import_from_txt = function(txt_str) {
+  // debugger
+  return new Promise( function(ok_callback, err_callback) {
+    var class_list = txt_str.split(/\r?\n/)
+    for ( var i in class_list) {
+      class_list[i] = class_list[i].split(',')[0]
+    }
+    this.d.classes = class_list
+    debugger
+  }.bind(this));
+}
+
+
 
 _via_import_export.prototype.import_from_coco = function(json_str) {
   try {
@@ -116,6 +134,7 @@ _via_import_export.prototype.export_to_file = function(data_format) {
     break;
   case 'webvtt':
     this.export_to_webvtt();
+    this.export_log()
     break;
 
   default:
@@ -252,6 +271,72 @@ _via_import_export.prototype.export_to_temporal_segments_csv = function() {
 }
 
 _via_import_export.prototype.export_to_webvtt = function() {
+
+  return new Promise( function(ok_callback, err_callback) {
+    var data_list = [this.d_RH, this.d_LH];
+    var str_list = ['RH', 'LH'];
+    for ( var ix in data_list){
+      var csv = [];
+  
+      var attribute = {}
+      for ( var aid in data_list[ix].store.attribute ) {
+        attribute[aid] = data_list[ix].store.attribute[aid].aname;
+      }
+  
+      csv.push('WEBVTT');
+      csv.push('');
+      // build file_list for each view_id
+      var vid_filesrc_str_list = {};
+      var vid, fid;
+      for ( var vindex in data_list[ix].store.project.vid_list ) {
+        vid = data_list[ix].store.project.vid_list[vindex];
+        var vid_filesrc_list = [];
+        for ( var findex in data_list[ix].store.view[vid].fid_list ) {
+          fid = data_list[ix].store.view[vid].fid_list[findex];
+          switch(data_list[ix].store.file[fid].loc) {
+          case _VIA_FILE_LOC.LOCAL:
+            if ( data_list[ix].file_ref.hasOwnProperty(fid) ) {
+              vid_filesrc_list.push( data_list[ix].file_ref[fid].name );
+            } else {
+              vid_filesrc_list.push( data_list[ix].store.file[fid].fname );
+            }
+            break;
+          case _VIA_FILE_LOC.INLINE:
+            vid_filesrc_list.push( data_list[ix].store.file[fid].fname );
+            break;
+          default:
+            vid_filesrc_list.push( data_list[ix].store.file[fid].src );
+          }
+        }
+        vid_filesrc_str_list[vid] = _via_util_obj2csv(vid_filesrc_list);
+      }
+  
+      for ( var mid in data_list[ix].store.metadata ) {
+        var tstart = _via_seconds_to_hh_mm_ss_ms(data_list[ix].store.metadata[mid].z[0]);
+        var tstart_str = tstart[0] + ':' + tstart[1] + ':' + tstart[2] + '.' + tstart[3];
+        var tend = _via_seconds_to_hh_mm_ss_ms(data_list[ix].store.metadata[mid].z[1]);
+        var tend_str = tend[0] + ':' + tend[1] + ':' + tend[2] + '.' + tend[3];
+        var subtitle = [];
+        for ( var aid in data_list[ix].store.metadata[mid].av ) {
+          subtitle.push(data_list[ix].store.metadata[mid].av[aid]);
+        }
+        var subtitle_str = subtitle.join(' ');
+        csv.push(tstart_str + ' --> ' + tend_str);
+        csv.push(subtitle.join(' '))
+        csv.push('');
+      }
+      var data_blob = new Blob( [csv.join('\n')],
+                                {type: 'text/vtt;charset=utf-8'});
+      var filename = [];
+      filename.push(data_list[ix].store.project.pname);
+      filename.push(str_list[ix]);
+      filename.push('.vtt');
+      _via_util_download_as_file(data_blob, filename.join(''));
+    }
+  }.bind(this));
+}
+
+_via_import_export.prototype.export_log = function() {
   return new Promise( function(ok_callback, err_callback) {
     var csv = [];
 
@@ -260,7 +345,7 @@ _via_import_export.prototype.export_to_webvtt = function() {
       attribute[aid] = this.d.store.attribute[aid].aname;
     }
 
-    csv.push('WEBVTT');
+    csv.push('TEXT');
     csv.push('');
     // build file_list for each view_id
     var vid_filesrc_str_list = {};
@@ -288,25 +373,17 @@ _via_import_export.prototype.export_to_webvtt = function() {
       vid_filesrc_str_list[vid] = _via_util_obj2csv(vid_filesrc_list);
     }
 
-    for ( var mid in this.d.store.metadata ) {
-      var tstart = _via_seconds_to_hh_mm_ss_ms(this.d.store.metadata[mid].z[0]);
-      var tstart_str = tstart[0] + ':' + tstart[1] + ':' + tstart[2] + '.' + tstart[3];
-      var tend = _via_seconds_to_hh_mm_ss_ms(this.d.store.metadata[mid].z[1]);
-      var tend_str = tend[0] + ':' + tend[1] + ':' + tend[2] + '.' + tend[3];
-      var subtitle = [];
-      for ( var aid in this.d.store.metadata[mid].av ) {
-        subtitle.push(this.d.store.metadata[mid].av[aid]);
-      }
-      var subtitle_str = subtitle.join(' ');
-      csv.push(tstart_str + ' --> ' + tend_str);
-      csv.push(subtitle.join(' '))
+    for ( var mid in this.d.log ) {
+      debugger;
+      var log_line = this.d.log[mid]
+      csv.push(log_line);
       csv.push('');
     }
     var data_blob = new Blob( [csv.join('\n')],
                               {type: 'text/vtt;charset=utf-8'});
     var filename = [];
     filename.push(this.d.store.project.pname);
-    filename.push('.vtt');
+    filename.push('_log.txt');
     _via_util_download_as_file(data_blob, filename.join(''));
   }.bind(this));
 }
@@ -341,12 +418,17 @@ _via_import_export.prototype.import_from_webvtt = function(webvtt_str, vid, subt
             offset = offset + 1;
           }
         }
+        if (subtitle_text["0"].indexOf(',') > -1){
+          var top5 = subtitle_text
+          var top1 = [subtitle_text["0"].split(',')[0]];
+        }
         var av = {}
-        av[subtitle_aid] = subtitle_text.join(' ');
+        av[subtitle_aid] = top1.join(' ');
         metadata_list.push({'vid': vid,
                             'z':[starttime_sec, endtime_sec],
                             'xy':[],
-                            'av': av
+                            'av': av,
+                            'top5': top5
                            });
         i = i + offset;
       } else {

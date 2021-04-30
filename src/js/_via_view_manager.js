@@ -9,9 +9,11 @@
 
 'use strict';
 
-function _via_view_manager(data, view_annotator, container) {
+function _via_view_manager(data, view_annotator, container, data_RH=null, data_LH=null) {
   this._ID = '_via_view_manager_';
   this.d = data;
+  this.d_RH = data_RH;
+  this.d_LH = data_LH;
   this.va = view_annotator;
   this.c = container;
 
@@ -277,6 +279,8 @@ _via_view_manager.prototype._file_add_from_filelist = function(filelist) {
     _via_util_msg_show('Failed to add files! [' + err + ']');
     console.warn(err);
   }.bind(this));
+  this.d_RH.store.view = this.d.store.view
+  this.d_LH.store.view = this.d.store.view
 }
 
 _via_view_manager.prototype._on_add_media_local = function() {
@@ -301,6 +305,8 @@ _via_view_manager.prototype._file_add_local = function(e) {
 _via_view_manager.prototype._on_event_view_bulk_add = function(data, event_payload) {
   this._view_selector_update();
   this.d._cache_update();
+  this.d_RH._cache_update();
+  this.d_LH._cache_update();
   if ( event_payload.vid_list.length ) {
     this.va.view_show( event_payload.vid_list[0] );
   }
