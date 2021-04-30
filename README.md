@@ -1,6 +1,7 @@
 # VIA Sign Language Annotator (VIA-SLA)
 This repository contains the code for a modification of the VIA subtitle annotator to annotate sign language videos.
 With [this repo](https://github.com/RenzKa/sign-segmentation) it is possible to extract proposals for sign segments and sign names.
+For more detailed information about the VIA tool please visit the [VIA website](https://www.robots.ox.ac.uk/~vgg/software/via/).
 
 ![alt text](doc/overview.png)
 
@@ -100,10 +101,3 @@ If you use this software, please cite it as follows:
   note = "Version: X.Y.Z, Accessed: INSERT_DATE_HERE" 
 }
 ```
-
-## Contact
-Contact [Abhishek Dutta](adutta_remove_me_@robots.ox.ac.uk) for any queries or feedback related to this application.
-
-## Acknowledgements
-This work is supported by EPSRC programme grant Seebibyte: Visual Search for the Era of Big Data ( [EP/M013774/1](http://www.seebibyte.org/index.html) )
-
